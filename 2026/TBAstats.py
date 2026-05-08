@@ -1,8 +1,16 @@
 # DO NOT SHARE!!!!!!            API_KEY = StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky 
 import requests
 import json
-def ping(url:str,headers=None,params=None,timeout=None,name=None):
-    status=requests.head(url=url,headers=headers,params=params,timeout=timeout)
+def ping(url:str,headConditions:dict={},name=None):
+    for i in ['headers','params','auth','allow_redirects','proxies','hooks','stream','verify','cert','timeout','cookies','files']:
+        try:
+            headConditions[i]
+            # print(f"{i} condition found")
+        except KeyError:
+            # print(f"{i} condition not found, setting to None")
+            headConditions[i]=None
+
+    status=requests.head(url=url,headers=headConditions['headers'],params=headConditions['params'],auth=headConditions['auth'],allow_redirects=headConditions['allow_redirects'],proxies=headConditions['proxies'],hooks=headConditions['hooks'],stream=headConditions['stream'],verify=headConditions['verify'],cert=headConditions['cert'],timeout=headConditions['timeout'],cookies=headConditions['cookies'],files=headConditions['files'])
     if status.status_code == 200:
         print(f"connection to {name if name!=None else ''} successful, link pinged: {url}")
     else:
@@ -37,9 +45,9 @@ def get_team_events_data(team: int):
 team=3414
 # SBparams={"metric":"norm_epa","limit":2}
 
-# ping(url="https://www.thebluealliance.com/api/v3/status",name="TBA",headers={"X-TBA-Auth-Key":"StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"})
-# ping(url="https://api.statbotics.io/openapi.json",name="SB")
+ping(url="https://www.thebluealliance.com/api/v3/status",name="TBA",headConditions={"headers":{"X-TBA-Auth-Key":"StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"}})
+ping(url="https://api.statbotics.io/openapi.json",name="SB")
 
-response=get_team_events_data(team=team)
+# response=get_team_events_data(team=team)
 
-print(response)
+# print(response)
