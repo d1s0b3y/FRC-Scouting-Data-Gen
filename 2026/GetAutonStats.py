@@ -94,7 +94,7 @@ try:
             autonWinsTeam[team['name']]['proportion']=autonWinsTeam[team['name']]['wins']/autonWinsTeam[team['name']]['total']
 
 except:
-    print("Inturrupted")
+    print("Interrupted")
     # print(f"General error {e}")
     # raise InterruptedError
 
