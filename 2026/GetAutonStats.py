@@ -1,13 +1,7 @@
 import statbotics
 import csv
+import random
 
-# wins=0
-# totals=0
-# for key in dicts:
-#     wins+=dicts[key]['wins']
-#     totals+=dicts[key]['total']
-# print(wins/totals)
-# 0.8011025928159187
 def listContatins(value,list):
     # print("cheching if key already queried")
     for i in list:
@@ -17,26 +11,38 @@ def listContatins(value,list):
 def changeKey(key,newKey,dict):
     values=dict.pop(key)
     dict[newKey]=(values)
-
 sb= statbotics.Statbotics()
-teamAmt=10
+teamAmt=500
 print("finding teams")
-countryErrors=0
+teams=[]
+randomNumbers=[]
+print("Generating randoms")
+for i in range(1001): # gets the random numbers here so that it runs faster getting the teams from statbotics
+    number=random.randint(0,1000)
+    if not listContatins(number,randomNumbers):
+        randomNumbers.append(number)
+    else: # make sure no duplicates so we dont collect data twice
+        i-=1
+print("Getting teams")
 try:
-    teams=sb.get_teams(metric='norm_epa',limit=teamAmt,fields=['team','name','state','country'])
-    autonWinsTeam={'general':{'total wins':0,'total matches checked':0,'score errors total':0,'winner errors total':0,'event errors total':0}}
+    for i in range(teamAmt):
+        teams.append(sb.get_teams(metric='norm_epa',limit=1,fields=['team','name','state','country'],offset=randomNumbers[i])[0])
+        print(i+1,"Team(s) Found")
+    autonWinsTeam={'general':{'total wins':0,'total losses':0,'total matches checked':0,'score errors total':0,'winner errors total':0,'event errors total':0,"Country errors total":0}}
     matchKeys=[]
+    print("collecting data for teams")
     for team in teams:
-        autonWinsTeam[team['name']]={'wins':0,'total':0,'proportion':0,'score errors':0,'winner errors':0,'event errors':0}
+        autonWinsTeam[team['name']]={'wins':0,'losses':0,'total':0,'proportion':0,'score errors':0,'winner errors':0,'event errors':0,'country errors':0}
         try:
             try:        
                 events=sb.get_events(year=2026,state=team['state'],country=team['country'],fields=['key','name'])
             except ValueError:
-                print("Country couldnt be found WHAT THE FUCK?")
-                countryErrors+=1
+                print("Country couldnt be found HOW???")
+                autonWinsTeam['general']['Country errors total']+=1
+                autonWinsTeam[team['name']]['country errors']+=1
         except UserWarning:
             events={}
-            print("Events could not be found WTF?")
+            print("Events could not be found ???")
             autonWinsTeam['general']['event errors total']+=1
             autonWinsTeam[team['name']]['event errors']+=1
         # print(events)
@@ -69,37 +75,44 @@ try:
                         autonWinsTeam[team['name']]['wins']+=1
                         if not listContatins(match['key'],matchKeys):
                             autonWinsTeam['general']['total wins']+=1
+                    else:
+                        autonWinsTeam[team['name']]['losses']+=1
+                        if not listContatins(match['key'],matchKeys):
+                            autonWinsTeam['general']['total losses']+=1
+
                     autonWinsTeam[team['name']]['total']+=1
 
                     if not listContatins(match['key'],matchKeys):
                         matchKeys.append(match['key'])
                         autonWinsTeam['general']['total matches checked']+=1
                     # else:
-                        # print(f"match {match['key']} already counted towards total")
+                        # print(f"match {match['key']} already counted towards total amount of matches")
                         # print(matchKeys)
             except UserWarning:
                 print(f"{team['name']} not found in {event['name']}")
         if autonWinsTeam[team['name']]['total'] >0:
             autonWinsTeam[team['name']]['proportion']=autonWinsTeam[team['name']]['wins']/autonWinsTeam[team['name']]['total']
 
-except Exception as e:
-    print(f"General error {e}")
+except:
+    print("Inturrupted")
+    # print(f"General error {e}")
     # raise InterruptedError
 
-with open('blah blah blah.csv', 'a', newline='',encoding='utf-8') as file:
-    writer = csv.DictWriter(file,fieldnames=['name','wins','total','proportion','score errors','winner errors','event errors'])
+with open('Actually Random Auton Correlation Data.csv', 'a', newline='',encoding='utf-8') as file:
+    writer = csv.DictWriter(file,fieldnames=['name','wins','losses','total','proportion','score errors','winner errors','event errors','country errors'])
     writer.writeheader()
 
     for key,value in autonWinsTeam.items():
         if key == 'general':
             changeKey('total wins','wins',value)
+            changeKey('total losses','losses',value)
             changeKey('total matches checked','total',value)
             changeKey('score errors total','score errors',value)
             changeKey('winner errors total','winner errors',value)
             changeKey('event errors total','event errors',value)
+            changeKey('Country errors total','country errors',value)
         row={'name':key}
         row.update(value)
         writer.writerow(row)
 
 print(autonWinsTeam['general'])
-print(f"country errors idfk {countryErrors}")
