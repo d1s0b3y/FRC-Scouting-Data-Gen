@@ -52,7 +52,8 @@ try:
                     run=True
                 else:
                     run = False
-                print("Events could not be found ???")
+                    print("Max offset reached, skipping")
+                print("Events could not be found ??? (offseting)")
                 autonWinsTeam['general']['event errors total']+=1
                 autonWinsTeam[team['name']]['event errors']+=1
         # print(events)
