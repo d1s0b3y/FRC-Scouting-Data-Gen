@@ -32,19 +32,29 @@ try:
     matchKeys=[]
     print("collecting data for teams")
     for team in teams:
+        eventOff=0
         autonWinsTeam[team['name']]={'wins':0,'losses':0,'total':0,'proportion':0,'score errors':0,'winner errors':0,'event errors':0,'country errors':0}
-        try:
-            try:        
-                events=sb.get_events(year=2026,state=team['state'],country=team['country'],fields=['key','name'])
-            except ValueError:
-                print("Country couldnt be found HOW???")
-                autonWinsTeam['general']['Country errors total']+=1
-                autonWinsTeam[team['name']]['country errors']+=1
-        except UserWarning:
-            events={}
-            print("Events could not be found ???")
-            autonWinsTeam['general']['event errors total']+=1
-            autonWinsTeam[team['name']]['event errors']+=1
+        run=True
+        while run==True:
+            try:
+                try:        
+                    events=sb.get_events(year=2026,state=team['state'],country=team['country'],fields=['key','name'],offset=eventOff)
+                    run=False
+                except ValueError:
+                    print("Country couldnt be found HOW???")
+                    autonWinsTeam['general']['Country errors total']+=1
+                    autonWinsTeam[team['name']]['country errors']+=1
+                    run=False
+            except UserWarning:
+                events={}
+                eventOff+=100
+                if eventOff<10000:
+                    run=True
+                else:
+                    run = False
+                print("Events could not be found ???")
+                autonWinsTeam['general']['event errors total']+=1
+                autonWinsTeam[team['name']]['event errors']+=1
         # print(events)
         print(f"{teams.index(team)} teams queried, {len(teams)-teams.index(team)} remaining")
         for event in events:
@@ -92,7 +102,6 @@ try:
                 print(f"{team['name']} not found in {event['name']}")
         if autonWinsTeam[team['name']]['total'] >0:
             autonWinsTeam[team['name']]['proportion']=autonWinsTeam[team['name']]['wins']/autonWinsTeam[team['name']]['total']
-
 except:
     print("Interrupted")
     # print(f"General error {e}")
