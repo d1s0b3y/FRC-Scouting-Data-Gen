@@ -1,4 +1,7 @@
-# DO NOT SHARE!!!!!!            API_KEY = StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky 
+# DO NOT SHARE!!!!!!                                                                                                                                                                                                                                                                                                                                                                                 API_KEY = StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky 
+
+TBA_API_KEY="StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"
+
 import requests
 import json
 def ping(url:str,headConditions:dict={},name=None):
@@ -22,7 +25,7 @@ def get_team_events_data(team: int):
     events={}
     # getting event codes
     print("getting event codes")
-    TBAresponse=requests.get(f"https://www.thebluealliance.com/api/v3/team/{'frc'+str(team)}/events/2026/keys",headers={"X-TBA-Auth-Key":"StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"})
+    TBAresponse=requests.get(f"https://www.thebluealliance.com/api/v3/team/{'frc'+str(team)}/events/2026/keys",headers={"X-TBA-Auth-Key":TBA_API_KEY})
     TBAtext=TBAresponse.text.split('"')
 
     # formating event codes
@@ -45,7 +48,7 @@ def get_team_events_data(team: int):
 team=3414
 # SBparams={"metric":"norm_epa","limit":2}
 
-ping(url="https://www.thebluealliance.com/api/v3/status",name="TBA",headConditions={"headers":{"X-TBA-Auth-Key":"StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"}})
+ping(url="https://www.thebluealliance.com/api/v3/status",name="TBA",headConditions={"headers":{"X-TBA-Auth-Key":TBA_API_KEY}})
 ping(url="https://api.statbotics.io/openapi.json",name="SB")
 
 # response=get_team_events_data(team=team)
