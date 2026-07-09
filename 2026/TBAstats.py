@@ -4,7 +4,7 @@ TBA_API_KEY="StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"
 
 import requests
 import json
-def ping(url:str,headConditions:dict={},name=None):
+def ping(url:str,headConditions:dict={},name:str=None,):
     for i in ['headers','params','auth','allow_redirects','proxies','hooks','stream','verify','cert','timeout','cookies','files']:
         try:
             headConditions[i]
