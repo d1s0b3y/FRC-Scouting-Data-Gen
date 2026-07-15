@@ -1,7 +1,5 @@
-# DO NOT SHARE!!!!!!                                                                                                                                                                                                                                                                                                                                                                                 API_KEY = StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky 
-
-TBA_API_KEY="StFmcbQSa2R3CgVBAyKOVxwxEprPStQxseGkMcZqVjghT421r6OIVYPbvxCcxSky"
-
+from Hidden import API_KEYS as APIkey
+TBA_API_KEY=APIkey.TBA_API_KEY
 import requests
 import json
 def ping(url:str,headConditions:dict={},name:str=None,):
@@ -17,11 +15,11 @@ def ping(url:str,headConditions:dict={},name:str=None,):
     if status.status_code == 200:
         print(f"connection to {name if name!=None else ''} successful, link pinged: {url}")
     else:
-        print("connection not successful")
+        print(f"connection to {str(name) if name!=None else str(url)} not successful")
         print(status)
         print(status.status_code)
 
-def get_team_events_data(team: int):
+def get_team_events_data(team: int,year:int):
     events={}
     # getting event codes
     print("getting event codes")
@@ -30,7 +28,7 @@ def get_team_events_data(team: int):
 
     # formating event codes
     for i in TBAtext:
-        if i.__contains__('2026')==False:
+        if i.__contains__(str(year))==False:
             TBAtext.remove(i)
     TBAtext.reverse()
     # getting event data
@@ -54,3 +52,5 @@ ping(url="https://api.statbotics.io/openapi.json",name="SB")
 # response=get_team_events_data(team=team)
 
 # print(response)
+
+# yes I did regenerate the API Key so if you try to use the one in the old commit it won't work
