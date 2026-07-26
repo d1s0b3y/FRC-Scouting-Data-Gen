@@ -2,7 +2,7 @@ from Hidden import API_KEYS as APIkey
 TBA_API_KEY=APIkey.TBA_API_KEY
 import requests
 import json
-def ping(url:str,headConditions:dict={},name:str=None,):
+def ping(url:str,headConditions:dict={},name:str=None,print_success:bool=False,print_fail:bool=True) -> bool:
     for i in ['headers','params','auth','allow_redirects','proxies','hooks','stream','verify','cert','timeout','cookies','files']:
         try:
             headConditions[i]
@@ -13,11 +13,15 @@ def ping(url:str,headConditions:dict={},name:str=None,):
 
     status=requests.head(url=url,headers=headConditions['headers'],params=headConditions['params'],auth=headConditions['auth'],allow_redirects=headConditions['allow_redirects'],proxies=headConditions['proxies'],hooks=headConditions['hooks'],stream=headConditions['stream'],verify=headConditions['verify'],cert=headConditions['cert'],timeout=headConditions['timeout'],cookies=headConditions['cookies'],files=headConditions['files'])
     if status.status_code == 200:
-        print(f"connection to {name if name!=None else ''} successful, link pinged: {url}")
+        if print_success:
+            print(f"connection to {name if name!=None else ''} successful, link pinged: {url}")
+        return True
     else:
-        print(f"connection to {str(name) if name!=None else str(url)} not successful")
-        print(status)
-        print(status.status_code)
+        if print_fail:
+            print(f"connection to {str(name) if name!=None else str(url)} not successful")
+            print(status)
+            print(status.status_code)
+        return False
 
 def get_team_events_data(team: int,year:int):
     events={}
@@ -44,13 +48,16 @@ def get_team_events_data(team: int,year:int):
         
 
 team=3414
-# SBparams={"metric":"norm_epa","limit":2}
-
-ping(url="https://www.thebluealliance.com/api/v3/status",name="TBA",headConditions={"headers":{"X-TBA-Auth-Key":TBA_API_KEY}})
-ping(url="https://api.statbotics.io/openapi.json",name="SB")
+year=2026
+attempts=1000
+sucess=0
+# ping(url=f"https://api.statbotics.io/openapi.json/v3/{team}/{year}")
+for i in range(attempts-1):
+    if ping(url="https://api.statbotics.io/openapi.json/v3/3414/2026",name="SB",print_success=False,print_fail=False):
+        sucess+=1
+    print(f"{sucess}/{i+1}")
+print(f"Final Count: {sucess}/{attempts}")
 
 # response=get_team_events_data(team=team)
 
 # print(response)
-
-# yes I did regenerate the API Key so if you try to use the one in the old commit it won't work
