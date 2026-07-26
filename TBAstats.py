@@ -51,6 +51,7 @@ team=3414
 year=2026
 attempts=1000
 sucess=0
+# ping(url=f"https://api.statbotics.io/openapi.json/v3/{team}/{year}")
 for i in range(attempts-1):
     if ping(url="https://api.statbotics.io/openapi.json/v3/3414/2026",name="SB",print_success=False,print_fail=False):
         sucess+=1
