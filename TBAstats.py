@@ -2,7 +2,7 @@ from Hidden import API_KEYS as APIkey
 TBA_API_KEY=APIkey.TBA_API_KEY
 import requests
 import json
-def ping(url:str,headConditions:dict={},name:str=None,print_success:bool=False,print_fail:bool=True) -> bool:
+def ping(url:str,headConditions:dict={},name:str="",print_success:bool=False,print_fail:bool=True) -> bool:
     for i in ['headers','params','auth','allow_redirects','proxies','hooks','stream','verify','cert','timeout','cookies','files']:
         try:
             headConditions[i]
@@ -14,7 +14,7 @@ def ping(url:str,headConditions:dict={},name:str=None,print_success:bool=False,p
     status=requests.head(url=url,headers=headConditions['headers'],params=headConditions['params'],auth=headConditions['auth'],allow_redirects=headConditions['allow_redirects'],proxies=headConditions['proxies'],hooks=headConditions['hooks'],stream=headConditions['stream'],verify=headConditions['verify'],cert=headConditions['cert'],timeout=headConditions['timeout'],cookies=headConditions['cookies'],files=headConditions['files'])
     if status.status_code == 200:
         if print_success:
-            print(f"connection to {name if name!=None else ''} successful, link pinged: {url}")
+            print(f"connection to {name if name!="" else ''} successful, link pinged: {url}")
         return True
     else:
         if print_fail:
@@ -45,8 +45,8 @@ def get_team_events_data(team: int,year:int):
         else:
             events[eventKey]=json.loads(SBresponse.text)
     return events
-        
 
+# https://frc-api.firstinspires.org first api base url
 team=3414
 year=2026
 attempts=1000

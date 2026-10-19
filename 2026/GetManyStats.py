@@ -1,34 +1,60 @@
-import statbotics
+import requests
+import json
 import csv
-# using statbotics
-sb= statbotics.Statbotics()
-statsLst=[]
-teamAmt=1
-teams=sb.get_teams(metric='norm_epa',limit=teamAmt,fields=['team','name'])
+import tqdm
+
+# get the base url (try from popcorn penuins if statbotics is down)
+try:
+    test=requests.get("https://api.statbotics.io/v3/team_year/3414/2026")
+    print(test.status_code)
+    if test.status_code!=200:
+        raise Exception
+    base_url="https://api.statbotics.io/v3/"
+except Exception as e:
+    print(f"error with statbotics using popcornpenguins statbotics:\n{e}")
+    base_url="https://api-statbotics.popcornpenguins.com/v3/"
+
+
+team_amount=1000
+year=2026
+output_file_name="more_than_1K_teams"
+teams=[]
+
 print("finding teams")
+if team_amount>1000:
+    offset=0
+    while team_amount>0:
+        if team_amount<1000:
+            limit=team_amount
+        else:
+            limit=1000
+        teams_response=requests.get(base_url+f"teams?active=true&metric=norm_epa&limit={limit}&offset={offset}")
+        for teams_group in json.loads(teams_response.text):
+            teams.append(teams_group)
+        offset+=1000
+        team_amount-=1000
+else:
+    teams_response=requests.get(base_url+f"teams?active=true&metric=norm_epa&limit={team_amount}")
+    teams=json.loads(teams_response.text)
 
-for team in teams:
-    # teamStats=sb.get_team_year(team['team'],2026)
-    teamStats=sb.get_team_year(team,2026)
-    total_points=teamStats['epa']
-    points = total_points['total_points']
-    mean=points
-    breakdown=total_points['breakdown']
-    record=teamStats['record']
-    wins=record['wins']
-    losses=record['losses']
-    # if teamStats['competing']['next_event_key']=='2026cmptx':
-    #     qualified=True
-    # else:
-    #     qualified=False
-    statsLst.append({"Team number":team,"Team name":teamStats['name'],"Epa":mean,"Auto EPA":breakdown['auto_points'],"Teleop EPA":breakdown['teleop_points'],"Energized":breakdown['energized_rp'], "Supercharged":breakdown['supercharged_rp'],"Transition":breakdown['transition_fuel'],"First Shift":breakdown['first_shift_fuel'],"Second Shift":breakdown['second_shift_fuel'],"Endgame":breakdown['endgame_fuel'],"Win Rate":teamStats['record']['winrate'],"Wins":wins,"Losses":losses})
-    # statsLst.append({"Team number":team['team'],"Team name":team['name'],"Epa":mean,"Auto EPA":breakdown['auto_points'],"Teleop EPA":breakdown['teleop_points'],"Energized":breakdown['energized_rp'], "Supercharged":breakdown['supercharged_rp'],"Transition":breakdown['transition_fuel'],"First Shift":breakdown['first_shift_fuel'],"Second Shift":breakdown['second_shift_fuel'],"Endgame":breakdown['endgame_fuel'],"Win Rate":teamStats['record']['winrate'],"Wins":wins,"Losses":losses})
-    print(f"gathered stats for {team}      {teams.index(team)+1} teams queried, {len(teams)-teams.index(team)-1} remaining",)
-    # print(f"gathered stats for {team['name']}      {teams.index(team)+1} teams queried, {len(teams)-teams.index(team)-1} remaining",)
-
-fieldnames=statsLst[0].keys()
-
-with open('.csv', 'a', newline='',encoding='utf-8') as file:
+print("gathering team data")
+with open(output_file_name+'.csv', 'a', newline='',encoding='utf-8') as file:
+    fieldnames=["Team number","Team name","Epa","Auto EPA","Teleop EPA","Energized","Supercharged","Transition","First Shift","Second Shift","Endgame","Win Rate","Wins","Losses"]
     writer = csv.DictWriter(file,fieldnames=fieldnames)
     writer.writeheader()
-    writer.writerows(statsLst)
+    for team in tqdm.tqdm(teams):
+        team_stats_response=requests.get(base_url+f"team_year/{team['team']}/{year}")
+        team_stats=json.loads(team_stats_response.text)
+        # stats to gether
+        total_points=team_stats['epa']
+        points = total_points['total_points']
+        mean=points
+        breakdown=total_points['breakdown']
+        record=team_stats['record']
+        wins=record['wins']
+        losses=record['losses']
+        # stats_list.append({"Team number":team['team'],"Team name":team_stats['name'],"Epa":mean,"Auto EPA":breakdown['auto_points'],"Teleop EPA":breakdown['teleop_points'],"Energized":breakdown['energized_rp'], "Supercharged":breakdown['supercharged_rp'],"Transition":breakdown['transition_fuel'],"First Shift":breakdown['first_shift_fuel'],"Second Shift":breakdown['second_shift_fuel'],"Endgame":breakdown['endgame_fuel'],"Win Rate":team_stats['record']['winrate'],"Wins":wins,"Losses":losses})
+        writer.writerow({"Team number":team['team'],"Team name":team_stats['name'],"Epa":mean,"Auto EPA":breakdown['auto_points'],"Teleop EPA":breakdown['teleop_points'],"Energized":breakdown['energized_rp'], "Supercharged":breakdown['supercharged_rp'],"Transition":breakdown['transition_fuel'],"First Shift":breakdown['first_shift_fuel'],"Second Shift":breakdown['second_shift_fuel'],"Endgame":breakdown['endgame_fuel'],"Win Rate":team_stats['record']['winrate'],"Wins":wins,"Losses":losses})
+        # print(f"gathered stats for {team['team']}:{team['name']}\n{teams.index(team)+1} teams queried, {len(teams)-teams.index(team)-1} remaining")
+
+
