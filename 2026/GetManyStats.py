@@ -54,5 +54,5 @@ with open(output_file_name+'.csv', 'a', newline='',encoding='utf-8') as file:
         losses=record['losses']
         writer.writerow({"Team number":team['team'],"Team name":team_stats['name'],"Epa":mean,"Auto EPA":breakdown['auto_points'],"Teleop EPA":breakdown['teleop_points'],"Energized":breakdown['energized_rp'], "Supercharged":breakdown['supercharged_rp'],"Transition":breakdown['transition_fuel'],"First Shift":breakdown['first_shift_fuel'],"Second Shift":breakdown['second_shift_fuel'],"Endgame":breakdown['endgame_fuel'],"Win Rate":team_stats['record']['winrate'],"Wins":wins,"Losses":losses})
         # print(f"gathered stats for {team['team']}:{team['name']}\n{teams.index(team)+1} teams queried, {len(teams)-teams.index(team)-1} remaining")
-
+file.close()
 
