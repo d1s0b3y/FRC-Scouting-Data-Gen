@@ -14,14 +14,35 @@ except Exception as e:
     print(f"error with statbotics using popcornpenguins statbotics:\n{e}")
     base_url="https://api-statbotics.popcornpenguins.com/v3/"
 
+# INPUTS
+# -------------------------------------------------
 # 3798 teams max (active)
 # 8169 teams max (all)
-team_amount=3798
+team_amount=3
 year=2026
-output_file_name="ALL_TEAMS"
-print("finding teams")
-active=False
+output_file_name="testagain"
+fieldnames=[
+    "Team number",
+    "Team name",
+    "Epa",
+    "Auto EPA",
+    "Teleop EPA",
+    "Energized",
+    "Supercharged",
+    "Transition",
+    "First Shift",
+    "Second Shift",
+    "Endgame",
+    "Win Rate",
+    "Wins",
+    "Losses"
+    ]
+active=True
+# -------------------------------------------------
+
+
 teams=[]
+print("finding teams")
 if team_amount>1000:
     offset=0
     while team_amount>0:
@@ -29,18 +50,17 @@ if team_amount>1000:
             limit=team_amount
         else:
             limit=1000
-        teams_response=requests.get(base_url+f"teams?{"active=true" if active else ""}&metric=norm_epa&limit={limit}&offset={offset}")
+        teams_response=requests.get(base_url+f"teams?{"active=true&" if active else "&"}metric=norm_epa&limit={limit}&offset={offset}")
         for teams_group in json.loads(teams_response.text):
             teams.append(teams_group)
         offset+=1000
         team_amount-=1000
 else:
-    teams_response=requests.get(base_url+f"teams?{"active=true" if active else ""}&metric=norm_epa&limit={team_amount}")
+    teams_response=requests.get(base_url+f"teams?{"active=true&" if active else "&"}metric=norm_epa&limit={team_amount}")
     teams=json.loads(teams_response.text)
 
 print("gathering team data")
 with open(output_file_name+'.csv', 'a', newline='',encoding='utf-8') as file:
-    fieldnames=["Team number","Team name","Epa","Auto EPA","Teleop EPA","Energized","Supercharged","Transition","First Shift","Second Shift","Endgame","Win Rate","Wins","Losses"]
     writer = csv.DictWriter(file,fieldnames=fieldnames)
     writer.writeheader()
     errors=0
@@ -62,7 +82,22 @@ with open(output_file_name+'.csv', 'a', newline='',encoding='utf-8') as file:
             errors+=1
             writer.writerow({"Team number":"N/A","Team name":"N/A"})
         if noerror:
-            writer.writerow({"Team number":team['team'],"Team name":team_stats['name'],"Epa":mean,"Auto EPA":breakdown['auto_points'],"Teleop EPA":breakdown['teleop_points'],"Energized":breakdown['energized_rp'], "Supercharged":breakdown['supercharged_rp'],"Transition":breakdown['transition_fuel'],"First Shift":breakdown['first_shift_fuel'],"Second Shift":breakdown['second_shift_fuel'],"Endgame":breakdown['endgame_fuel'],"Win Rate":team_stats['record']['winrate'],"Wins":wins,"Losses":losses})
+            writer.writerow({
+                "Team number":team['team'],
+                "Team name":team_stats['name'],
+                "Epa":mean,
+                "Auto EPA":breakdown['auto_points'],
+                "Teleop EPA":breakdown['teleop_points'],
+                "Energized":breakdown['energized_rp'],
+                "Supercharged":breakdown['supercharged_rp'],
+                "Transition":breakdown['transition_fuel'],
+                "First Shift":breakdown['first_shift_fuel'],
+                "Second Shift":breakdown['second_shift_fuel'],
+                "Endgame":breakdown['endgame_fuel'],
+                "Win Rate":team_stats['record']['winrate'],
+                "Wins":wins,
+                "Losses":losses
+                })
         # print(f"gathered stats for {team['team']}:{team['name']}\n{teams.index(team)+1} teams queried, {len(teams)-teams.index(team)-1} remaining")
 file.close()
 print(f"amount of write errors: {errors}")
