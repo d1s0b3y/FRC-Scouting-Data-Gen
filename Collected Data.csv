@@ -1,0 +1,3 @@
+team,name,other data
+123,456,"{'epa': 1, 'norm': 2}"
+456,123,"{'epa': 2, 'norm': 1}"
